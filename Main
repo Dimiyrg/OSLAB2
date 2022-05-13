@@ -1,0 +1,109 @@
+#include <windows.h>
+#include <iostream>
+#include<vector>
+#include<string>
+using namespace std;
+
+
+double average;
+struct mydata {
+	int min = 0;
+	int max = 0;
+	int* arr = NULL;
+	int size = 0;
+	double average = 0;
+};
+
+
+
+DWORD WINAPI Min_max(LPVOID aa) {
+	mydata* a = (mydata*)aa;
+	cout << "Поток Min_max открыт" << "\n";
+	a->min = a->arr[0];
+	a->max = a->arr[0];
+	for (int i = 1; i < a->size; i++)
+	{
+		if (a->max < a->arr[i])
+		{
+			a->max = a->arr[i];
+		}
+		Sleep(7);
+		if (a->min > a->arr[i]) 
+		{
+			a->min = a->arr[i];
+		}
+		Sleep(7);
+	}
+
+	cout << "Минимум массива: " << a->min << endl;
+	cout << "Максимум массива: " << a->max << endl;
+	cout << "Поток Min_max отработал\n"  << endl;
+	return 0;
+}
+
+DWORD WINAPI Average(LPVOID aa) {
+	mydata* a = (mydata*)aa;
+
+	cout << "Поток Average открыт" << endl;
+
+	for (int i = 0; i < a->size; i++) {
+		a->average += a->arr[i];
+		Sleep(12);
+	}
+	a->average = a->average / (double)(a->size);
+	cout << "Среднее:" << a->average << endl;
+	cout << "Поток average отработал" << endl;
+	return 0;
+
+}
+
+
+
+
+int main()
+{
+	setlocale(LC_ALL, ".1251");
+	int size;
+	cout << "Введите размер массива: ";
+	cin >> size;
+	int* myarr = new int[size];
+	cout << "Заполните массив: ";
+	for (int i = 0; i < size; i++) {
+		std::cin >> myarr[i];
+
+	}
+
+	struct mydata* a = new mydata;
+	a->arr = myarr;
+	a->size = size;
+
+	HANDLE hThread;
+	DWORD IDThread;
+	hThread = CreateThread(NULL, 0, Min_max, (void*)a, 0, &IDThread);
+	if (hThread == NULL)
+		return GetLastError();
+	HANDLE hThread_average;
+	hThread_average = CreateThread(NULL, 0, Average, (void*)a, 0, &IDThread);
+	if (hThread_average == NULL)
+		return GetLastError();
+
+	WaitForSingleObject(hThread, INFINITE);
+	WaitForSingleObject(hThread_average, INFINITE);
+	CloseHandle(hThread);
+	CloseHandle(hThread_average);
+
+
+	for (int i = 0; i < size; i++) {
+		if (myarr[i] == a->max) myarr[i] = a->average;
+		if (myarr[i] == a->min) myarr[i] = a->average;
+	}
+
+	cout << "Полученный массив: ";
+	for (int i = 0; i < size; i++) {
+		cout << myarr[i] << " ";
+	}
+
+	delete[] myarr;
+	delete a;
+	return 0;
+}
