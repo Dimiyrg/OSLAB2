@@ -4,8 +4,6 @@
 #include<string>
 using namespace std;
 
-
-double average;
 struct mydata {
 	int min = 0;
 	int max = 0;
