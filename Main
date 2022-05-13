@@ -67,7 +67,7 @@ int main()
 	int* myarr = new int[size];
 	cout << "Заполните массив: ";
 	for (int i = 0; i < size; i++) {
-		std::cin >> myarr[i];
+		cin >> myarr[i];
 
 	}
 
